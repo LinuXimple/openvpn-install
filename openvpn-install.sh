@@ -1,5 +1,5 @@
 #!/bin/bash
-#
+#qwer
 # https://github.com/Nyr/openvpn-install
 #
 # Copyright (c) 2013 Nyr. Released under the MIT License.
@@ -8,7 +8,7 @@
 # Detect Debian users running the script with "sh" instead of bash
 if readlink /proc/$$/exe | grep -q "dash"; then
 	echo 'This installer needs to be run with "bash", not "sh".'
-	exit
+	
 fi
 
 # Discard stdin. Needed when running from an one-liner which includes a newline
@@ -17,7 +17,7 @@ read -N 999999 -t 0.001
 # Detect OpenVZ 6
 if [[ $(uname -r | cut -d "." -f 1) -eq 2 ]]; then
 	echo "The system is running an old kernel, which is incompatible with this installer."
-	exit
+	
 fi
 
 # Detect OS
@@ -41,42 +41,42 @@ elif [[ -e /etc/fedora-release ]]; then
 else
 	echo "This installer seems to be running on an unsupported distribution.
 Supported distros are Ubuntu, Debian, AlmaLinux, Rocky Linux, CentOS and Fedora."
-	exit
+	
 fi
 
 if [[ "$os" == "ubuntu" && "$os_version" -lt 1804 ]]; then
 	echo "Ubuntu 18.04 or higher is required to use this installer.
 This version of Ubuntu is too old and unsupported."
-	exit
+	
 fi
 
 if [[ "$os" == "debian" && "$os_version" -lt 9 ]]; then
 	echo "Debian 9 or higher is required to use this installer.
 This version of Debian is too old and unsupported."
-	exit
+	
 fi
 
 if [[ "$os" == "centos" && "$os_version" -lt 7 ]]; then
 	echo "CentOS 7 or higher is required to use this installer.
 This version of CentOS is too old and unsupported."
-	exit
+	
 fi
 
 # Detect environments where $PATH does not include the sbin directories
 if ! grep -q sbin <<< "$PATH"; then
 	echo '$PATH does not include sbin. Try using "su -" instead of "su".'
-	exit
+	
 fi
 
 if [[ "$EUID" -ne 0 ]]; then
 	echo "This installer needs to be run with superuser privileges."
-	exit
+	
 fi
 
 if [[ ! -e /dev/net/tun ]] || ! ( exec 7<>/dev/net/tun ) 2>/dev/null; then
 	echo "The system does not have the TUN device available.
 TUN needs to be enabled before running this installer."
-	exit
+	
 fi
 
 new_client () {
@@ -158,8 +158,8 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	fi
 	echo
 	echo "Which protocol should OpenVPN use?"
-	echo "   1) UDP (recommended)"
-	echo "   2) TCP"
+	echo "   1) UDP "
+	echo "   2) TCP (recommended)"
 	read -p "Protocol [1]: " protocol
 	until [[ -z "$protocol" || "$protocol" =~ ^[12]$ ]]; do
 		echo "$protocol: invalid selection."
@@ -183,9 +183,9 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	[[ -z "$port" ]] && port="1194"
 	echo
 	echo "Select a DNS server for the clients:"
-	echo "   1) Current system resolvers"
+	echo "   1) 1.1.1.1"
 	echo "   2) Google"
-	echo "   3) 1.1.1.1"
+	echo "   3) Current system resolvers"
 	echo "   4) OpenDNS"
 	echo "   5) Quad9"
 	echo "   6) AdGuard"
@@ -288,6 +288,16 @@ server 10.8.0.0 255.255.255.0" > /etc/openvpn/server/server.conf
 	# DNS
 	case "$dns" in
 		1|"")
+			echo 'push "dhcp-option DNS 1.1.1.1"' >> /etc/openvpn/server/server.conf
+			echo 'push "dhcp-option DNS 1.0.0.1"' >> /etc/openvpn/server/server.conf
+		;;
+		2)
+			echo 'push "dhcp-option DNS 8.8.8.8"' >> /etc/openvpn/server/server.conf
+			echo 'push "dhcp-option DNS 8.8.4.4"' >> /etc/openvpn/server/server.conf
+		;;
+		3)
+			
+			
 			# Locate the proper resolv.conf
 			# Needed for systems running systemd-resolved
 			if grep -q '^nameserver 127.0.0.53' "/etc/resolv.conf"; then
@@ -299,14 +309,7 @@ server 10.8.0.0 255.255.255.0" > /etc/openvpn/server/server.conf
 			grep -v '^#\|^;' "$resolv_conf" | grep '^nameserver' | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}' | while read line; do
 				echo "push \"dhcp-option DNS $line\"" >> /etc/openvpn/server/server.conf
 			done
-		;;
-		2)
-			echo 'push "dhcp-option DNS 8.8.8.8"' >> /etc/openvpn/server/server.conf
-			echo 'push "dhcp-option DNS 8.8.4.4"' >> /etc/openvpn/server/server.conf
-		;;
-		3)
-			echo 'push "dhcp-option DNS 1.1.1.1"' >> /etc/openvpn/server/server.conf
-			echo 'push "dhcp-option DNS 1.0.0.1"' >> /etc/openvpn/server/server.conf
+			
 		;;
 		4)
 			echo 'push "dhcp-option DNS 208.67.222.222"' >> /etc/openvpn/server/server.conf
@@ -466,7 +469,7 @@ else
 			new_client
 			echo
 			echo "$client added. Configuration available in:" ~/"$client.ovpn"
-			exit
+			
 		;;
 		2)
 			# This option could be documented a bit better and maybe even be simplified
@@ -475,7 +478,7 @@ else
 			if [[ "$number_of_clients" = 0 ]]; then
 				echo
 				echo "There are no existing clients!"
-				exit
+				
 			fi
 			echo
 			echo "Select the client to revoke:"
@@ -506,7 +509,7 @@ else
 				echo
 				echo "$client revocation aborted!"
 			fi
-			exit
+			
 		;;
 		3)
 			echo
@@ -558,10 +561,10 @@ else
 				echo
 				echo "OpenVPN removal aborted!"
 			fi
-			exit
+			
 		;;
 		4)
-			exit
+			
 		;;
 	esac
 fi
